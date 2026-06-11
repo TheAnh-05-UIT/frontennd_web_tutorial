@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar, Footer } from './components/layout';
-import { HomePage, TutorialsPage, ProjectsPage, RoadmapsPage, AboutPage } from './pages/public';
+import { HomePage, TutorialsPage, TutorialDetailPage, ProjectsPage, ProjectDetailPage, RoadmapsPage, RoadmapDetailPage, AboutPage } from './pages/public';
 import { DashboardHome, DashboardLearning, DashboardTutorials, DashboardProjects, DashboardSettings } from './pages/user';
-import { AdminOverview, AdminUsers } from './pages/admin';
+import { AdminOverview, AdminUsers, AdminTutorials, AdminProjects, AdminRoadmaps } from './pages/admin';
 import { DashboardLayout } from './pages/DashboardLayout';
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -29,6 +29,9 @@ function AppRoutes() {
             <>
               <Route path="/admin" element={<AdminOverview />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/tutorials" element={<AdminTutorials />} />
+              <Route path="/admin/projects" element={<AdminProjects />} />
+              <Route path="/admin/roadmaps" element={<AdminRoadmaps />} />
               <Route path="/admin/*" element={<AdminOverview />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </>
@@ -52,8 +55,11 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
       <Route path="/tutorials" element={<PublicLayout><TutorialsPage /></PublicLayout>} />
+      <Route path="/tutorials/:id" element={<PublicLayout><TutorialDetailPage /></PublicLayout>} />
       <Route path="/projects" element={<PublicLayout><ProjectsPage /></PublicLayout>} />
+      <Route path="/projects/:id" element={<PublicLayout><ProjectDetailPage /></PublicLayout>} />
       <Route path="/roadmaps" element={<PublicLayout><RoadmapsPage /></PublicLayout>} />
+      <Route path="/roadmaps/:id" element={<PublicLayout><RoadmapDetailPage /></PublicLayout>} />
       <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

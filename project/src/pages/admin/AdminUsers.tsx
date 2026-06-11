@@ -1,22 +1,81 @@
-import { useState } from 'react';
-import { Search, MoreVertical, Shield, Mail, CalendarDays, Filter } from 'lucide-react';
-import { Card, Badge, Button, SearchInput, Avatar } from '../../components/ui';
-
-const mockUsers = [
-  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'user', status: 'active', joined: '2025-01-15', avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100' },
-  { id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'user', status: 'active', joined: '2025-01-14', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100' },
-  { id: '3', name: 'Carol White', email: 'carol@example.com', role: 'admin', status: 'active', joined: '2025-01-10', avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100' },
-  { id: '4', name: 'David Brown', email: 'david@example.com', role: 'user', status: 'inactive', joined: '2025-01-08', avatar: 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=100' },
-  { id: '5', name: 'Eve Wilson', email: 'eve@example.com', role: 'user', status: 'active', joined: '2025-01-05', avatar: 'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=100' },
-];
+import { useState, useEffect } from 'react';
+import { Search, MoreVertical, Shield, UserPlus, Trash2, Edit2 } from 'lucide-react';
+import { Card, Badge, Button, SearchInput, Avatar, Modal, Input } from '../../components/ui';
+import { api } from '../../services/api';
+import { User } from '../../types';
 
 export function AdminUsers() {
+  const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'admin'>('all');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState<Partial<User>>({});
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await api.get<User[]>('/users');
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
+  const handleOpenModal = (user?: User) => {
+    if (user) {
+      setEditingUser(user);
+      setFormData(user);
+    } else {
+      setEditingUser(null);
+      setFormData({
+        name: '',
+        email: '',
+        role: 'user',
+        avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100',
+        joinDate: new Date().toISOString().split('T')[0],
+        coursesCompleted: 0,
+        articlesRead: 0,
+        projectsFinished: 0,
+        learningStreak: 0,
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingUser?.id) {
+        await api.put(`/users/${editingUser.id}`, formData);
+      } else {
+        await api.post('/users', formData);
+      }
+      setIsModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to save user:', error);
+      alert('Không thể kết nối đến Backend. Vui lòng đảm bảo Spring Boot và MySQL đang chạy.');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.delete(`/users/${id}`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     return matchesSearch && matchesRole;
   });
@@ -28,9 +87,9 @@ export function AdminUsers() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage platform users</p>
         </div>
-        <Button>
-          <Mail className="w-4 h-4" />
-          Invite User
+        <Button onClick={() => handleOpenModal()}>
+          <UserPlus className="w-4 h-4" />
+          Add User
         </Button>
       </div>
 
@@ -64,48 +123,98 @@ export function AdminUsers() {
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Joined</th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredUsers.map(user => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar src={user.avatar} alt={user.name} size="md" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={user.role === 'admin' ? 'primary' : 'secondary'}>
-                      {user.role === 'admin' && <Shield className="w-3 h-3" />}
-                      {user.role}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge variant={user.status === 'active' ? 'success' : 'warning'}>
-                      {user.status}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(user.joined).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    No users found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredUsers.map(user => (
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar src={user.avatar} alt={user.name} size="md" />
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={user.role === 'admin' ? 'primary' : 'secondary'}>
+                        {user.role === 'admin' && <Shield className="w-3 h-3" />}
+                        {user.role}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      {user.joinDate ? new Date(user.joinDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button onClick={() => handleOpenModal(user)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-500 transition-colors">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(user.id)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </Card>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingUser ? 'Edit User' : 'Add New User'}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+            <Input
+              required
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+            <Input
+              type="email"
+              required
+              value={formData.email || ''}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+            <select
+              className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2"
+              value={formData.role || 'user'}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as 'user' | 'admin' })}
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)} type="button">
+              Cancel
+            </Button>
+            <Button type="submit">
+              {editingUser ? 'Save Changes' : 'Create User'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { TutorialCard } from '../../components/public';
 import { Button, SearchInput, Badge } from '../../components/ui';
-import { tutorials, categories } from '../../data';
-import type { Category } from '../../types';
+import { categories } from '../../data';
+import type { Category, Tutorial } from '../../types';
+import { api } from '../../services/api';
 
 const categoryColors: Record<string, 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'> = {
   'DevOps': 'primary',
@@ -18,8 +19,23 @@ const categoryColors: Record<string, 'primary' | 'secondary' | 'accent' | 'succe
 };
 
 export function TutorialsPage() {
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetchTutorials();
+  }, []);
+
+  const fetchTutorials = async () => {
+    try {
+      const data = await api.get<Tutorial[]>('/tutorials');
+      setTutorials(data || []);
+    } catch (error) {
+      console.error('Failed to fetch tutorials:', error);
+    }
+  };
+
 
   const filteredTutorials = tutorials.filter(tutorial => {
     const matchesCategory = selectedCategory === 'all' || tutorial.category === selectedCategory;

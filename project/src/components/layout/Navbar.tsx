@@ -80,6 +80,9 @@ export function Navbar() {
                 <UserPlus className="w-4 h-4" />
                 Sign up
               </Button>
+              <Button variant="secondary" size="md" onClick={() => setViewMode('admin')}>
+                Admin
+              </Button>
             </div>
 
             <button
@@ -116,6 +119,9 @@ export function Navbar() {
               <Button variant="primary" className="w-full justify-center" onClick={() => setViewMode('user')}>
                 <UserPlus className="w-4 h-4" />
                 Sign up
+              </Button>
+              <Button variant="secondary" className="w-full justify-center" onClick={() => setViewMode('admin')}>
+                Admin Dashboard
               </Button>
             </div>
           </div>

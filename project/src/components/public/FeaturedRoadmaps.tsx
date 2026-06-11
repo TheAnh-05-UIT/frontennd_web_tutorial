@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Infinity, Cloud, Shield, Layers, Container } from 'lucide-react';
 import { Card, Button } from '../ui';
-import { roadmaps } from '../../data';
+import { api } from '../../services/api';
+import type { Roadmap } from '../../types';
 
 const iconComponents: Record<string, React.ReactNode> = {
   'infinity': <Infinity className="w-6 h-6" />,
@@ -40,6 +42,20 @@ const colorClasses: Record<string, { bg: string; text: string; border: string }>
 };
 
 export function FeaturedRoadmaps() {
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+
+  useEffect(() => {
+    const fetchRoadmaps = async () => {
+      try {
+        const data = await api.get<Roadmap[]>('/roadmaps');
+        setRoadmaps(data || []);
+      } catch (error) {
+        console.error('Failed to fetch roadmaps:', error);
+      }
+    };
+    fetchRoadmaps();
+  }, []);
+
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900">
       <div className="container-app">
@@ -71,7 +87,7 @@ export function FeaturedRoadmaps() {
 }
 
 interface RoadmapCardProps {
-  roadmap: typeof roadmaps[0];
+  roadmap: Roadmap;
 }
 
 export function RoadmapCard({ roadmap }: RoadmapCardProps) {
@@ -79,8 +95,8 @@ export function RoadmapCard({ roadmap }: RoadmapCardProps) {
   const completion = Math.floor(Math.random() * 100);
 
   return (
-    <Card hover className={`p-6 group cursor-pointer ${colors.border}`}>
-      <div className="flex items-start gap-4">
+    <Card hover className={`p-6 group ${colors.border}`}>
+      <Link to={`/roadmaps/${roadmap.id}`} className="flex items-start gap-4">
         <div className={`p-3 rounded-xl ${colors.bg} ${colors.text} transition-colors`}>
           {iconComponents[roadmap.icon] || <Infinity className="w-6 h-6" />}
         </div>
@@ -93,7 +109,7 @@ export function RoadmapCard({ roadmap }: RoadmapCardProps) {
           </p>
           <div className="mt-4 flex items-center justify-between">
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {roadmap.steps.length} steps
+              {roadmap.steps?.length || 0} steps
             </span>
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -106,7 +122,7 @@ export function RoadmapCard({ roadmap }: RoadmapCardProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     </Card>
   );
 }

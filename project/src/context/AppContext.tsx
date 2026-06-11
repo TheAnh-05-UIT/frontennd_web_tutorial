@@ -26,8 +26,14 @@ const mockUser: User = {
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [viewMode, setViewMode] = useState<ViewMode>('public');
-  const [user, setUser] = useState<User | null>(null);
+  const getInitialViewMode = (): ViewMode => {
+    if (window.location.pathname.startsWith('/admin')) return 'admin';
+    if (window.location.pathname.startsWith('/dashboard')) return 'user';
+    return 'public';
+  };
+
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode());
+  const [user, setUser] = useState<User | null>(getInitialViewMode() !== 'public' ? mockUser : null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleSetViewMode = (mode: ViewMode) => {

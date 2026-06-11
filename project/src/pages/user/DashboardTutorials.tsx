@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Edit, Trash2, Eye, CheckCircle, Clock } from 'lucide-react';
 import { Card, Badge, Button, SearchInput } from '../../components/ui';
-import { tutorials } from '../../data';
+import { api } from '../../services/api';
+import type { Tutorial } from '../../types';
 
 const statusColors = {
   'Published': 'success',
@@ -9,17 +10,31 @@ const statusColors = {
   'Scheduled': 'primary',
 } as const;
 
-const mockArticles = tutorials.map(t => ({
-  ...t,
-  status: ['Published', 'Draft', 'Scheduled'][Math.floor(Math.random() * 3)] as 'Published' | 'Draft' | 'Scheduled',
-}));
-
 export function DashboardTutorials() {
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'Published' | 'Draft' | 'Scheduled'>('all');
 
-  const filteredArticles = mockArticles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    const fetchTutorials = async () => {
+      try {
+        const data = await api.get<Tutorial[]>('/tutorials');
+        setTutorials(data || []);
+      } catch (error) {
+        console.error('Failed to fetch tutorials:', error);
+      }
+    };
+    fetchTutorials();
+  }, []);
+
+  // Use a pseudo status since backend doesn't have status yet
+  const articlesWithStatus = tutorials.map((t, idx) => ({
+    ...t,
+    status: ['Published', 'Draft', 'Scheduled'][idx % 3] as 'Published' | 'Draft' | 'Scheduled',
+  }));
+
+  const filteredArticles = articlesWithStatus.filter(article => {
+    const matchesSearch = article.title?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || article.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
@@ -90,14 +105,14 @@ export function DashboardTutorials() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                       <Eye className="w-4 h-4" />
-                      {(article.views / 1000).toFixed(1)}k
+                      {((article.views || 0) / 1000).toFixed(1)}k
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={statusColors[article.status]}>{article.status}</Badge>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(article.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {new Date(article.publishDate || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">

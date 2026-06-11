@@ -45,6 +45,7 @@ export interface Project {
   githubUrl: string;
   demoUrl?: string;
   status?: ProjectStatus;
+  content?: string;
 }
 
 export interface Roadmap {
@@ -54,6 +55,7 @@ export interface Roadmap {
   icon: string;
   color: string;
   steps: RoadmapStep[];
+  content?: string;
 }
 
 export interface RoadmapStep {

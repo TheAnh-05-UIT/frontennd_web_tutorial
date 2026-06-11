@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Github, ExternalLink, ArrowRight } from 'lucide-react';
 import { Card, Badge, Button } from '../ui';
-import { projects } from '../../data';
+import { api } from '../../services/api';
+import type { Project } from '../../types';
 
 const difficultyColors: Record<string, 'success' | 'warning' | 'error'> = {
   'Beginner': 'success',
@@ -10,6 +12,20 @@ const difficultyColors: Record<string, 'success' | 'warning' | 'error'> = {
 };
 
 export function FeaturedProjects() {
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await api.get<Project[]>('/projects');
+        setProjects(data || []);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   return (
     <section className="py-20 bg-white dark:bg-gray-950">
       <div className="container-app">
@@ -41,56 +57,38 @@ export function FeaturedProjects() {
 }
 
 interface ProjectCardProps {
-  project: typeof projects[0];
+  project: Project;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const diffColor = difficultyColors[project.difficulty] || 'success';
 
   return (
-    <Card hover className="overflow-hidden group">
-      <div className="relative">
+    <Card className="overflow-hidden group flex flex-col h-full">
+      <Link to={`/projects/${project.id}`} className="block relative">
         <img
           src={project.thumbnail}
           alt={project.title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
-            <Github className="w-4 h-4" />
-            Code
-          </a>
-          {project.demoUrl && (
-            <a
-              href={project.demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Demo
-            </a>
-          )}
-        </div>
-      </div>
-      <div className="p-5">
+      </Link>
+      
+      <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-center gap-2 mb-3">
           <Badge variant={diffColor}>{project.difficulty}</Badge>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {project.title}
-        </h3>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+        <Link to={`/projects/${project.id}`} className="hover:text-primary-600 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {project.title}
+          </h3>
+        </Link>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 flex-1">
           {project.description}
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {project.techStack.slice(0, 4).map(tech => (
+        
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.techStack?.slice(0, 4).map(tech => (
             <span
               key={tech}
               className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -98,6 +96,35 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {tech}
             </span>
           ))}
+        </div>
+
+        <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100 dark:border-gray-800">
+          <Link
+            to={`/projects/${project.id}`}
+            className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            Details
+          </Link>
+          {project.githubUrl && (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+          )}
+          {project.demoUrl && (
+            <a
+              href={project.demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 p-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+            >
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          )}
         </div>
       </div>
     </Card>

@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Eye, Calendar, ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, Eye, Calendar } from 'lucide-react';
 import { Card, Badge, Button, Avatar } from '../ui';
-import { tutorials } from '../../data';
+import { api } from '../../services/api';
+import type { Tutorial } from '../../types';
 
 const categoryColors: Record<string, 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'> = {
   'DevOps': 'primary',
@@ -16,6 +18,20 @@ const categoryColors: Record<string, 'primary' | 'secondary' | 'accent' | 'succe
 };
 
 export function FeaturedTutorials() {
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+
+  useEffect(() => {
+    const fetchTutorials = async () => {
+      try {
+        const data = await api.get<Tutorial[]>('/tutorials');
+        setTutorials(data || []);
+      } catch (error) {
+        console.error('Failed to fetch tutorials:', error);
+      }
+    };
+    fetchTutorials();
+  }, []);
+
   const featured = tutorials.slice(0, 4);
 
   return (
@@ -49,7 +65,7 @@ export function FeaturedTutorials() {
 }
 
 interface TutorialCardProps {
-  tutorial: typeof tutorials[0];
+  tutorial: Tutorial;
   featured?: boolean;
 }
 
@@ -57,52 +73,54 @@ export function TutorialCard({ tutorial, featured = false }: TutorialCardProps) 
   const color = categoryColors[tutorial.category] || 'primary';
 
   return (
-    <Card hover className={`overflow-hidden group ${featured ? 'md:col-span-2' : ''}`}>
-      <div className="relative">
-        <img
-          src={tutorial.coverImage}
-          alt={tutorial.title}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <Badge
-          variant={color}
-          className="absolute top-3 left-3"
-        >
-          {tutorial.category}
-        </Badge>
-      </div>
-      <div className="p-5">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-          {tutorial.title}
-        </h3>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-          {tutorial.description}
-        </p>
+    <Link to={`/tutorials/${tutorial.id}`} className={`block group ${featured ? 'md:col-span-2' : ''}`}>
+      <Card hover className="overflow-hidden h-full">
+        <div className="relative">
+          <img
+            src={tutorial.coverImage}
+            alt={tutorial.title}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <Badge
+            variant={color}
+            className="absolute top-3 left-3"
+          >
+            {tutorial.category}
+          </Badge>
+        </div>
+        <div className="p-5">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+            {tutorial.title}
+          </h3>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            {tutorial.description}
+          </p>
 
-        <div className="mt-4 flex items-center gap-3">
-          <Avatar src={tutorial.author.avatar} alt={tutorial.author.name} size="sm" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {tutorial.author.name}
-            </p>
+          <div className="mt-4 flex items-center gap-3">
+            <Avatar src={tutorial.author?.avatar} alt={tutorial.author?.name} size="sm" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {tutorial.author?.name}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {tutorial.readTime} min
+            </div>
+            <div className="flex items-center gap-1">
+              <Eye className="w-3.5 h-3.5" />
+              {((tutorial.views || 0) / 1000).toFixed(1)}k
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              {new Date(tutorial.publishDate || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
           </div>
         </div>
-
-        <div className="mt-4 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
-            {tutorial.readTime} min
-          </div>
-          <div className="flex items-center gap-1">
-            <Eye className="w-3.5 h-3.5" />
-            {(tutorial.views / 1000).toFixed(1)}k
-          </div>
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" />
-            {new Date(tutorial.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          </div>
-        </div>
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 }

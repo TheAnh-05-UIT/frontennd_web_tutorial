@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Plus, MoreVertical, Github, ExternalLink } from 'lucide-react';
 import { Card, Badge, Button } from '../../components/ui';
-import { projects } from '../../data';
-import type { ProjectStatus } from '../../types';
+import { api } from '../../services/api';
+import type { Project, ProjectStatus } from '../../types';
 
 const statusColors: Record<ProjectStatus, 'success' | 'warning' | 'primary' | 'secondary'> = {
   'Completed': 'success',
@@ -12,16 +13,25 @@ const statusColors: Record<ProjectStatus, 'success' | 'warning' | 'primary' | 's
 
 const columns: ProjectStatus[] = ['Planned', 'In Progress', 'Review', 'Completed'];
 
-const mockProjects = projects.map(p => ({
-  ...p,
-  status: columns[Math.floor(Math.random() * 4)] as ProjectStatus,
-}));
-
 export function DashboardProjects() {
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await api.get<Project[]>('/projects');
+        setProjects(data || []);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   const projectsByStatus = columns.reduce((acc, status) => {
-    acc[status] = mockProjects.filter(p => p.status === status);
+    acc[status] = projects.filter(p => (p.status || 'Planned') === status);
     return acc;
-  }, {} as Record<ProjectStatus, typeof mockProjects>);
+  }, {} as Record<ProjectStatus, Project[]>);
 
   return (
     <div className="space-y-6">

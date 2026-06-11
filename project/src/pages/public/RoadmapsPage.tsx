@@ -1,7 +1,23 @@
+import { useState, useEffect } from 'react';
 import { RoadmapCard } from '../../components/public';
-import { roadmaps } from '../../data';
+import { api } from '../../services/api';
+import type { Roadmap } from '../../types';
 
 export function RoadmapsPage() {
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+
+  useEffect(() => {
+    const fetchRoadmaps = async () => {
+      try {
+        const data = await api.get<Roadmap[]>('/roadmaps');
+        setRoadmaps(data || []);
+      } catch (error) {
+        console.error('Failed to fetch roadmaps:', error);
+      }
+    };
+    fetchRoadmaps();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">

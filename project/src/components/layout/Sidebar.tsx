@@ -30,11 +30,10 @@ const userLinks = [
 
 const adminLinks = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { path: '/admin/articles', label: 'Tutorials', icon: BookOpen },
-  { path: '/admin/categories', label: 'Projects', icon: FolderKanban },
+  { path: '/admin/users', label: 'Users', icon: User },
+  { path: '/admin/tutorials', label: 'Tutorials', icon: BookOpen },
   { path: '/admin/projects', label: 'Projects', icon: FolderKanban },
-  { path: '/admin/users', label: 'Profile', icon: User },
-  { path: '/admin/analytics', label: 'Roadmaps', icon: Map },
+  { path: '/admin/roadmaps', label: 'Roadmaps', icon: Map },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

@@ -1,20 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { ProjectCard } from '../../components/public';
 import { Button, SearchInput } from '../../components/ui';
-import { projects } from '../../data';
+import { api } from '../../services/api';
+import type { Project } from '../../types';
 
 const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'] as const;
 type DifficultyFilter = typeof difficulties[number];
 
 export function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
   const [difficulty, setDifficulty] = useState<DifficultyFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await api.get<Project[]>('/projects');
+        setProjects(data || []);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   const filteredProjects = projects.filter(project => {
     const matchesDifficulty = difficulty === 'All' || project.difficulty === difficulty;
-    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (project.title?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+      (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) || '');
     return matchesDifficulty && matchesSearch;
   });
 
