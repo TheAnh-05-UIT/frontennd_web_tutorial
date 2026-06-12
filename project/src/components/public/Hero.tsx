@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, FolderKanban, Map, Users, Infinity } from 'lucide-react';
+import { ArrowRight, Map, Infinity } from 'lucide-react';
 import { Button } from '../ui';
 
 export function Hero() {
@@ -10,7 +10,7 @@ export function Hero() {
         <div className="absolute top-1/2 -left-20 w-60 h-60 bg-secondary-200/30 dark:bg-secondary-900/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container-app pt-10 pb-20 lg:pt-12 lg:pb-28">
+      <div className="container-app pt-4 pb-20 lg:pt-6 lg:pb-28">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative z-10">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-tight">

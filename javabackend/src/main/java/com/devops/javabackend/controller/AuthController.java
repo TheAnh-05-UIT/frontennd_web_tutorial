@@ -1,14 +1,22 @@
 package com.devops.javabackend.controller;
 
+import com.devops.javabackend.dto.LoginRequest;
+import com.devops.javabackend.dto.RegisterRequest;
+import com.devops.javabackend.model.User;
+import com.devops.javabackend.repository.UserRepository;
 import com.devops.javabackend.security.JwtUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -22,23 +30,23 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private com.devops.javabackend.repository.UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private static final String DEFAULT_AVATAR = "/default-avatar.png";
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
-
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
-            // Attempt authentication
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
 
-            // If successful, generate token
-            com.devops.javabackend.model.User user = userRepository.findByEmail(email).orElse(null);
+            User user = userRepository.findByEmail(request.getEmail()).orElse(null);
             String role = (user != null && user.getRole() != null) ? user.getRole().toUpperCase() : "USER";
-            String token = jwtUtil.generateToken(email, role);
+            String token = jwtUtil.generateToken(request.getEmail(), role);
 
             return ResponseEntity.ok(Map.of("token", token));
 
@@ -47,27 +55,21 @@ public class AuthController {
                     .body(Map.of("error", "Invalid email or password"));
         }
     }
-    @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        String name = request.get("name");
-        String email = request.get("email");
-        String password = request.get("password");
-
-        if (userRepository.findByEmail(email).isPresent()) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Email already exists"));
         }
 
-        com.devops.javabackend.model.User newUser = new com.devops.javabackend.model.User();
-        newUser.setName(name);
-        newUser.setEmail(email);
-        newUser.setPassword(passwordEncoder.encode(password));
+        User newUser = new User();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
         newUser.setRole("USER");
-        newUser.setJoinDate(java.time.LocalDate.now());
-        newUser.setAvatar("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"); // default avatar
+        newUser.setJoinDate(LocalDate.now());
+        newUser.setAvatar(DEFAULT_AVATAR);
         newUser.setCoursesCompleted(0);
         newUser.setArticlesRead(0);
         newUser.setProjectsFinished(0);
@@ -75,13 +77,13 @@ public class AuthController {
 
         userRepository.save(newUser);
 
-        // Generate token right away so they can log in
-        String token = jwtUtil.generateToken(email, "USER");
+        String token = jwtUtil.generateToken(request.getEmail(), "USER");
 
         return ResponseEntity.ok(Map.of("token", token, "message", "Registration successful"));
     }
+
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -92,7 +94,7 @@ public class AuthController {
                         "name", user.getName(),
                         "email", user.getEmail(),
                         "role", user.getRole(),
-                        "avatar", user.getAvatar(),
+                        "avatar", user.getAvatar() != null ? user.getAvatar() : DEFAULT_AVATAR,
                         "joinDate", user.getJoinDate(),
                         "learningStreak", user.getLearningStreak(),
                         "coursesCompleted", user.getCoursesCompleted(),

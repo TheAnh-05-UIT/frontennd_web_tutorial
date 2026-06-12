@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Edit, Trash2, Eye, CheckCircle, Clock } from 'lucide-react';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { Card, Badge, Button, SearchInput } from '../../components/ui';
 import { api } from '../../services/api';
 import type { Tutorial } from '../../types';

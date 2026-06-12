@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Trash2, Edit2, FolderKanban } from 'lucide-react';
+import { Plus, Trash2, Edit2, FolderKanban } from 'lucide-react';
 import { Card, Badge, Button, SearchInput, Modal, Input } from '../../components/ui';
 import { api } from '../../services/api';
 import { Project } from '../../types';

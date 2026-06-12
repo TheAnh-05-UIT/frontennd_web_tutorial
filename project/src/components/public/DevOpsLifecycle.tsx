@@ -9,8 +9,25 @@ import {
   Activity,
 } from 'lucide-react';
 import { Card } from '../ui';
-import { devOpsPhases } from '../../data';
 
+interface DevOpsPhase {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  tools: string[];
+}
+
+const devOpsPhases: DevOpsPhase[] = [
+  { id: '1', name: 'Plan', description: 'Define requirements, estimate resources, and plan project milestones.', icon: 'clipboard-list', tools: ['Jira', 'Confluence', 'Trello'] },
+  { id: '2', name: 'Code', description: 'Write, review, and manage source code with version control.', icon: 'code', tools: ['Git', 'GitHub', 'GitLab'] },
+  { id: '3', name: 'Build', description: 'Compile source code and create deployable artifacts.', icon: 'hammer', tools: ['Maven', 'Gradle', 'npm'] },
+  { id: '4', name: 'Test', description: 'Run automated tests to ensure code quality and functionality.', icon: 'flask-conical', tools: ['Jest', 'Selenium', 'JUnit'] },
+  { id: '5', name: 'Release', description: 'Package and version applications for deployment.', icon: 'package', tools: ['Semantic Release', 'Docker', 'Artifactory'] },
+  { id: '6', name: 'Deploy', description: 'Release applications to production environments.', icon: 'rocket', tools: ['Docker', 'Kubernetes', 'Terraform', 'ArgoCD'] },
+  { id: '7', name: 'Operate', description: 'Manage and maintain production systems and infrastructure.', icon: 'settings', tools: ['Ansible', 'Kubernetes', 'AWS'] },
+  { id: '8', name: 'Monitor', description: 'Track system performance and detect issues proactively.', icon: 'activity', tools: ['Prometheus', 'Grafana', 'Datadog'] },
+];
 const iconMap: Record<string, React.ReactNode> = {
   'clipboard-list': <ClipboardList className="w-6 h-6" />,
   'code': <Code className="w-6 h-6" />,
@@ -49,7 +66,7 @@ export function DevOpsLifecycle() {
 
         <div className="relative">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {devOpsPhases.map((phase, index) => (
+            {devOpsPhases.map((phase) => (
               <Card
                 key={phase.id}
                 hover

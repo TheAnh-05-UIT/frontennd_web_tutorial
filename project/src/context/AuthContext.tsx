@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { api } from '../services/api';
 
 interface DecodedToken {
   sub: string;
@@ -35,17 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
 
-  const fetchProfile = async (token: string) => {
+  const fetchProfile = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data);
-      }
+      const data = await api.get<UserProfile>('/auth/me');
+      setUser(data);
     } catch (e) {
       console.error('Failed to fetch profile', e);
     }
@@ -59,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (decoded.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
           setRole(decoded.role || 'USER');
-          fetchProfile(token);
+          fetchProfile();
         } else {
           logout();
         }
@@ -75,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const decoded = jwtDecode<DecodedToken>(token);
       setIsAuthenticated(true);
       setRole(decoded.role || 'USER');
-      fetchProfile(token);
+      fetchProfile();
     } catch (e) {
       console.error('Invalid token format');
     }

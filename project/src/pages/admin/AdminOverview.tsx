@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Users, BookOpen, FolderKanban, TrendingUp, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { Card, StatCard, SimpleBarChart, DonutChart, Badge, Button } from '../../components/ui';
-import { weeklyActivity, categoryDistribution } from '../../data';
+import { Activity } from 'lucide-react';
+import { Card, SimpleBarChart, DonutChart, Badge, Button } from '../../components/ui';
 import { api } from '../../services/api';
 
 export function AdminOverview() {
@@ -20,17 +19,17 @@ export function AdminOverview() {
     const fetchAllData = async () => {
       try {
         const [usersData, tutorialsData, projectsData] = await Promise.all([
-          api.get<any[]>('/users') || Promise.resolve([]),
-          api.get<any[]>('/tutorials') || Promise.resolve([]),
-          api.get<any[]>('/projects') || Promise.resolve([]),
+          api.get<any[]>('/users'),
+          api.get<any[]>('/tutorials'),
+          api.get<any[]>('/projects'),
         ]);
-        
+
         const users = usersData || [];
         const tutorials = tutorialsData || [];
         const projects = projectsData || [];
 
         const totalViews = tutorials.reduce((sum, t) => sum + (t.views || 0), 0);
-        
+
         setStats([
           { label: 'Total Users', value: users.length.toString() },
           { label: 'Total Tutorials', value: tutorials.length.toString() },
@@ -46,18 +45,18 @@ export function AdminOverview() {
           const cat = t.category || 'Other';
           catMap.set(cat, (catMap.get(cat) || 0) + 1);
         });
-        
+
         const COLORS = ['#3b82f6', '#8b5cf6', '#f97316', '#10b981', '#6b7280', '#ef4444', '#eab308'];
         const totalCat = tutorials.length || 1;
-        
-        const dist = Array.from(catMap.entries()).map(([name, count], idx) => ({ 
-          name, 
-          value: Math.round((count / totalCat) * 100), 
-          color: COLORS[idx % COLORS.length] 
-        }));
-        setDistributionData(dist.length > 0 ? dist : categoryDistribution);
 
-        // Weekly activity (mocking somewhat based on users)
+        const dist = Array.from(catMap.entries()).map(([name, count], idx) => ({
+          name,
+          value: Math.round((count / totalCat) * 100),
+          color: COLORS[idx % COLORS.length]
+        }));
+        setDistributionData(dist);
+
+        // Weekly activity based on user registrations
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const weekData = days.map(day => ({ date: day, value: 0 }));
         users.forEach(u => {
@@ -66,9 +65,7 @@ export function AdminOverview() {
             if (!isNaN(d)) weekData[d].value += 1;
           }
         });
-        // If all 0, use mock to avoid empty chart
-        const hasActivity = weekData.some(d => d.value > 0);
-        setActivityData(hasActivity ? weekData : weeklyActivity);
+        setActivityData(weekData);
 
         // Recent activity mixed from users, tutorials, projects
         const mixed = [
@@ -106,13 +103,21 @@ export function AdminOverview() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-6">User Growth</h3>
-          <SimpleBarChart data={activityData} height={200} />
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-6">User Registrations</h3>
+          {activityData.some(d => d.value > 0) ? (
+            <SimpleBarChart data={activityData} height={200} />
+          ) : (
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">No registration data yet</p>
+          )}
         </Card>
 
         <Card className="p-6">
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-6">Content Distribution</h3>
-          <DonutChart data={distributionData} size={180} />
+          {distributionData.length > 0 ? (
+            <DonutChart data={distributionData} size={180} />
+          ) : (
+            <p className="text-center text-gray-500 dark:text-gray-400 py-8">No content data yet</p>
+          )}
         </Card>
       </div>
 
@@ -123,7 +128,7 @@ export function AdminOverview() {
             <Button variant="ghost" size="sm">View all</Button>
           </div>
           <div className="space-y-4">
-            {recentActivities.map(activity => (
+            {recentActivities.length > 0 ? recentActivities.map(activity => (
               <div key={activity.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                   <Activity className="w-5 h-5 text-gray-500" />
@@ -134,7 +139,9 @@ export function AdminOverview() {
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</span>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-gray-500 dark:text-gray-400 py-4">No recent activity</p>
+            )}
           </div>
         </Card>
 
@@ -144,16 +151,20 @@ export function AdminOverview() {
             <Button variant="ghost" size="sm">View all</Button>
           </div>
           <div className="space-y-4">
-            {users.map(user => (
+            {users.length > 0 ? users.map(user => (
               <div key={user.id} className="flex items-center gap-3">
-                <img src={user.avatar || 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100'} alt={user.name || 'User'} className="w-10 h-10 rounded-full object-cover" />
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-300 font-semibold">
+                  {(user.name || 'U').charAt(0).toUpperCase()}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.name || 'Anonymous'}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email || 'No email'}</p>
                 </div>
-                <Badge variant={user.role === 'admin' ? 'primary' : 'secondary'}>{user.role || 'user'}</Badge>
+                <Badge variant={user.role === 'ADMIN' ? 'primary' : 'secondary'}>{user.role || 'USER'}</Badge>
               </div>
-            ))}
+            )) : (
+              <p className="text-center text-gray-500 dark:text-gray-400 py-4">No users yet</p>
+            )}
           </div>
         </Card>
       </div>

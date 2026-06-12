@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Shield, UserPlus, Trash2, Edit2 } from 'lucide-react';
+import { Shield, UserPlus, Trash2, Edit2 } from 'lucide-react';
 import { Card, Badge, Button, SearchInput, Avatar, Modal, Input } from '../../components/ui';
 import { api } from '../../services/api';
 import { User } from '../../types';

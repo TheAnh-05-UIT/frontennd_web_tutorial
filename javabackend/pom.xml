@@ -11,9 +11,9 @@
 	<groupId>com.devops</groupId>
 	<artifactId>javabackend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
-	<url/>
+	<name>DevOps Tutorial Backend</name>
+	<description>REST API backend for DevOps Tutorial Platform - Spring Boot + MySQL + JWT Auth</description>
+	<url>https://github.com/TheAnh-05-UIT/devops-tutorial</url>
 	<licenses>
 		<license/>
 	</licenses>

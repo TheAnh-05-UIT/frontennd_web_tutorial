@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { TutorialCard } from '../../components/public';
 import { Button, SearchInput, Badge } from '../../components/ui';
-import { categories } from '../../data';
 import type { Category, Tutorial } from '../../types';
 import { api } from '../../services/api';
+
+const categories: Category[] = ['DevOps', 'Docker', 'Kubernetes', 'AWS', 'Terraform', 'CI/CD', 'Linux', 'Monitoring', 'Security'];
 
 const categoryColors: Record<string, 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'> = {
   'DevOps': 'primary',

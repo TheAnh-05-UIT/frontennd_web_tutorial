@@ -1,10 +1,10 @@
 import { User, Bell, Shield, Moon, Sun, Globe } from 'lucide-react';
 import { Card, Button, Input, Avatar } from '../../components/ui';
-import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../hooks/useTheme';
 
 export function DashboardSettings() {
-  const { user } = useApp();
+  const { user } = useAuth();
   const { isDark, toggle } = useTheme();
 
   return (
