@@ -23,7 +23,9 @@ jobs:
 
     - name: Build Backend with Maven
       working-directory: ./javabackend
-      run: ./mvnw clean package -DskipTests
+      run: |
+        chmod +x mvnw
+        ./mvnw clean package -DskipTests
       # Lưu ý: Bỏ -DskipTests nếu bạn có viết Unit Test và muốn CI chạy test
 
   # 2. KIỂM TRA VÀ BUILD FRONTEND (React Vite)
