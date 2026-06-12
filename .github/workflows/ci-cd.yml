@@ -59,22 +59,18 @@ jobs:
     - name: Test Build Docker Compose
       run: docker-compose build
 
-  # 4. DEPLOY LÊN VPS (Chỉ chạy khi push vào nhánh main)
-  # Phần này bị comment lại. Khi nào bạn mua VPS (như Ubuntu, AWS, DigitalOcean),
-  # Hãy bỏ comment và điền thông tin vào phần Settings -> Secrets của Github.
-  
-  # deploy-to-vps:
-  #   needs: docker-build-test
-  #   if: github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Deploy to Server via SSH
-  #     uses: appleboy/ssh-action@v1.0.3
-  #     with:
-  #       host: ${{ secrets.SERVER_IP }}
-  #       username: ${{ secrets.SERVER_USERNAME }}
-  #       password: ${{ secrets.SERVER_PASSWORD }} # Hoặc dùng key: ${{ secrets.SERVER_SSH_KEY }}
-  #       script: |
-  #         cd /path/to/your/project
-  #         git pull origin main
-  #         docker-compose up -d --build
+  # 4. DEPLOY TỰ ĐỘNG BẰNG SELF-HOSTED RUNNER
+  # Job này sẽ ra lệnh cho Runner đang cài sẵn trong máy ảo Ubuntu của bạn
+  # Tự động kéo code mới và chạy docker-compose.
+  deploy:
+    needs: docker-build-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Run Docker Compose
+      run: |
+        docker-compose down
+        docker-compose up -d --build

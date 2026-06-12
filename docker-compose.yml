@@ -55,5 +55,13 @@ services:
     ports:
       - "3000:80"
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: devops-tunnel
+    command: tunnel --url http://frontend:80
+    restart: unless-stopped
+    depends_on:
+      - frontend
+
 volumes:
   mysql_data:
