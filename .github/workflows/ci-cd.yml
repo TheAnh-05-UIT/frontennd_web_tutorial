@@ -59,7 +59,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Test Build Docker Compose
-      run: docker-compose build
+      run: docker compose build
 
   # 4. DEPLOY TỰ ĐỘNG BẰNG SELF-HOSTED RUNNER
   # Job này sẽ ra lệnh cho Runner đang cài sẵn trong máy ảo Ubuntu của bạn
@@ -74,5 +74,5 @@ jobs:
 
     - name: Run Docker Compose
       run: |
-        docker-compose down
-        docker-compose up -d --build
+        docker compose down || docker-compose down
+        docker compose up -d --build || docker-compose up -d --build
