@@ -1,10 +1,10 @@
 import { BookOpen, FolderKanban, Award, Flame, TrendingUp, Calendar, Clock } from 'lucide-react';
 import { Card, StatCard, SimpleBarChart, DonutChart, Button, Badge } from '../../components/ui';
-import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { weeklyActivity, categoryDistribution, recentActivity, tutorials } from '../../data';
 
 export function DashboardHome() {
-  const { user } = useApp();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-8">

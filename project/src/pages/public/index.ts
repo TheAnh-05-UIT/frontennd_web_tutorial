@@ -6,3 +6,4 @@ export { ProjectDetailPage } from './ProjectDetailPage';
 export { RoadmapsPage } from './RoadmapsPage';
 export { RoadmapDetailPage } from './RoadmapDetailPage';
 export { AboutPage } from './AboutPage';
+export { RegisterPage } from './RegisterPage';

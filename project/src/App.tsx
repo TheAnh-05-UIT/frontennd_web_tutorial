@@ -1,10 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar, Footer } from './components/layout';
-import { HomePage, TutorialsPage, TutorialDetailPage, ProjectsPage, ProjectDetailPage, RoadmapsPage, RoadmapDetailPage, AboutPage } from './pages/public';
+import { HomePage, TutorialsPage, TutorialDetailPage, ProjectsPage, ProjectDetailPage, RoadmapsPage, RoadmapDetailPage, AboutPage, RegisterPage } from './pages/public';
 import { DashboardHome, DashboardLearning, DashboardTutorials, DashboardProjects, DashboardSettings } from './pages/user';
-import { AdminOverview, AdminUsers, AdminTutorials, AdminProjects, AdminRoadmaps } from './pages/admin';
+import { AdminOverview, AdminUsers, AdminTutorials, AdminProjects, AdminRoadmaps, AdminLogin, AdminSettings } from './pages/admin';
 import { DashboardLayout } from './pages/DashboardLayout';
+import { useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,9 +21,20 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
-  const { viewMode } = useApp();
+  const { viewMode, setViewMode } = useApp();
+  const { isAuthenticated, role } = useAuth();
 
   if (viewMode === 'user' || viewMode === 'admin') {
+    if (!isAuthenticated) {
+      return <AdminLogin />;
+    }
+
+    if (viewMode === 'admin' && role !== 'ADMIN') {
+      // Force user back to user dashboard if they are not an admin
+      setTimeout(() => setViewMode('user'), 0);
+      return null;
+    }
+
     return (
       <Routes>
         <Route element={<DashboardLayout variant={viewMode} />}>
@@ -32,6 +45,7 @@ function AppRoutes() {
               <Route path="/admin/tutorials" element={<AdminTutorials />} />
               <Route path="/admin/projects" element={<AdminProjects />} />
               <Route path="/admin/roadmaps" element={<AdminRoadmaps />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/*" element={<AdminOverview />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </>
@@ -61,6 +75,8 @@ function AppRoutes() {
       <Route path="/roadmaps" element={<PublicLayout><RoadmapsPage /></PublicLayout>} />
       <Route path="/roadmaps/:id" element={<PublicLayout><RoadmapDetailPage /></PublicLayout>} />
       <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<AdminLogin />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -69,9 +85,11 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppProvider>
-        <AppRoutes />
-      </AppProvider>
+      <AuthProvider>
+        <AppProvider>
+          <AppRoutes />
+        </AppProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

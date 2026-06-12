@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Avatar } from '../ui';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 
 const userLinks = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -38,7 +39,8 @@ const adminLinks = [
 ];
 
 export function Sidebar({ variant = 'user' }: { variant?: 'user' | 'admin' }) {
-  const { user, sidebarOpen, setSidebarOpen, setViewMode } = useApp();
+  const { sidebarOpen, setSidebarOpen, setViewMode } = useApp();
+  const { user, logout } = useAuth();
 
   const links = variant === 'admin' ? adminLinks : userLinks;
 
@@ -114,8 +116,12 @@ export function Sidebar({ variant = 'user' }: { variant?: 'user' | 'admin' }) {
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
               </div>
               <button
-                onClick={() => setViewMode('public')}
+                onClick={() => {
+                  logout();
+                  setViewMode('public');
+                }}
                 className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Log out"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

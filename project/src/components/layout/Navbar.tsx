@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Moon, Sun, Menu, X, LogIn, UserPlus } from 'lucide-react';
-import { Button, SearchInput } from '../ui';
+import { Search, Moon, Sun, Menu, X, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
+import { Button, SearchInput, Avatar } from '../ui';
 import { useTheme } from '../../hooks/useTheme';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 
 const navLinks = [
   { path: '/', label: 'Home' },
@@ -16,6 +17,7 @@ const navLinks = [
 export function Navbar() {
   const { isDark, toggle } = useTheme();
   const { setViewMode } = useApp();
+  const { isAuthenticated, user, role } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -72,17 +74,37 @@ export function Navbar() {
             </button>
 
             <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="md" onClick={() => setViewMode('user')}>
-                <LogIn className="w-4 h-4" />
-                Log in
-              </Button>
-              <Button variant="primary" size="md" onClick={() => setViewMode('user')}>
-                <UserPlus className="w-4 h-4" />
-                Sign up
-              </Button>
-              <Button variant="secondary" size="md" onClick={() => setViewMode('admin')}>
-                Admin
-              </Button>
+              {isAuthenticated && user ? (
+                <>
+                  <button 
+                    onClick={() => setViewMode('user')}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <Avatar src={user.avatar} alt={user.name} size="sm" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user.name.split(' ')[0]}</span>
+                  </button>
+                  {role === 'ADMIN' && (
+                    <Button variant="secondary" size="md" onClick={() => setViewMode('admin')}>
+                      Admin
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost" size="md">
+                      <LogIn className="w-4 h-4" />
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button variant="primary" size="md">
+                      <UserPlus className="w-4 h-4" />
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             <button
@@ -112,17 +134,34 @@ export function Navbar() {
               ))}
             </nav>
             <div className="mt-4 flex flex-col gap-2">
-              <Button variant="ghost" className="w-full justify-center" onClick={() => setViewMode('user')}>
-                <LogIn className="w-4 h-4" />
-                Log in
-              </Button>
-              <Button variant="primary" className="w-full justify-center" onClick={() => setViewMode('user')}>
-                <UserPlus className="w-4 h-4" />
-                Sign up
-              </Button>
-              <Button variant="secondary" className="w-full justify-center" onClick={() => setViewMode('admin')}>
-                Admin Dashboard
-              </Button>
+              {isAuthenticated && user ? (
+                <>
+                  <Button variant="ghost" className="w-full justify-center" onClick={() => setViewMode('user')}>
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                  {role === 'ADMIN' && (
+                    <Button variant="secondary" className="w-full justify-center" onClick={() => setViewMode('admin')}>
+                      Admin Dashboard
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block w-full">
+                    <Button variant="ghost" className="w-full justify-center">
+                      <LogIn className="w-4 h-4" />
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/register" className="block w-full">
+                    <Button variant="primary" className="w-full justify-center">
+                      <UserPlus className="w-4 h-4" />
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

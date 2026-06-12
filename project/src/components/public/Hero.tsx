@@ -10,17 +10,9 @@ export function Hero() {
         <div className="absolute top-1/2 -left-20 w-60 h-60 bg-secondary-200/30 dark:bg-secondary-900/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="container-app py-20 lg:py-28">
+      <div className="container-app pt-10 pb-20 lg:pt-12 lg:pb-28">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-900/30 px-4 py-1.5 text-sm font-medium text-primary-700 dark:text-primary-300 mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
-              </span>
-              New tutorials added weekly
-            </div>
-
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-gray-100 leading-tight">
               Learn <span className="text-gradient">DevOps</span>
               <br />
