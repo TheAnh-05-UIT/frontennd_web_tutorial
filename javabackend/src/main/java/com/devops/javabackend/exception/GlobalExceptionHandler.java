@@ -1,4 +1,4 @@
-package com.devops.javabackend.controller;
+package com.devops.javabackend.exception;
 
 import com.devops.javabackend.dto.ApiResponse;
 import org.springframework.http.HttpStatus;

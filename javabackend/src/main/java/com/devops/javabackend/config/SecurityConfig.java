@@ -1,5 +1,6 @@
-package com.devops.javabackend.security;
+package com.devops.javabackend.config;
 
+import com.devops.javabackend.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
