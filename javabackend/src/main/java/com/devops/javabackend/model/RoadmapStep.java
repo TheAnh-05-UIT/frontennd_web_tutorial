@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "roadmap_steps")
-public class RoadmapStep {
+public class RoadmapStep extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +21,6 @@ public class RoadmapStep {
     @Column(name = "resource")
     private List<String> resources;
 
-    private Boolean completed;
 
     @ManyToOne
     @JoinColumn(name = "roadmap_id")
@@ -40,8 +39,7 @@ public class RoadmapStep {
     public List<String> getResources() { return resources; }
     public void setResources(List<String> resources) { this.resources = resources; }
 
-    public Boolean getCompleted() { return completed; }
-    public void setCompleted(Boolean completed) { this.completed = completed; }
+
 
     public Roadmap getRoadmap() { return roadmap; }
     public void setRoadmap(Roadmap roadmap) { this.roadmap = roadmap; }

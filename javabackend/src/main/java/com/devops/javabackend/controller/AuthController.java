@@ -70,10 +70,7 @@ public class AuthController {
         newUser.setRole("USER");
         newUser.setJoinDate(LocalDate.now());
         newUser.setAvatar(DEFAULT_AVATAR);
-        newUser.setCoursesCompleted(0);
-        newUser.setArticlesRead(0);
-        newUser.setProjectsFinished(0);
-        newUser.setLearningStreak(0);
+
 
         userRepository.save(newUser);
 
@@ -95,11 +92,7 @@ public class AuthController {
                         "email", user.getEmail(),
                         "role", user.getRole(),
                         "avatar", user.getAvatar() != null ? user.getAvatar() : DEFAULT_AVATAR,
-                        "joinDate", user.getJoinDate(),
-                        "learningStreak", user.getLearningStreak(),
-                        "coursesCompleted", user.getCoursesCompleted(),
-                        "projectsFinished", user.getProjectsFinished(),
-                        "articlesRead", user.getArticlesRead()
+                        "joinDate", user.getJoinDate()
                 )))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }

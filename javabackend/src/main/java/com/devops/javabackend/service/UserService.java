@@ -35,10 +35,7 @@ public class UserService {
             existing.setAvatar(updatedUser.getAvatar());
             existing.setRole(updatedUser.getRole());
             existing.setJoinDate(updatedUser.getJoinDate());
-            existing.setCoursesCompleted(updatedUser.getCoursesCompleted());
-            existing.setArticlesRead(updatedUser.getArticlesRead());
-            existing.setProjectsFinished(updatedUser.getProjectsFinished());
-            existing.setLearningStreak(updatedUser.getLearningStreak());
+
             return userRepository.save(existing);
         });
     }

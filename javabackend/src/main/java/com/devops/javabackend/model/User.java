@@ -3,9 +3,11 @@ package com.devops.javabackend.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,10 +19,14 @@ public class User {
     private String role;
     private LocalDate joinDate;
     
-    private Integer coursesCompleted;
-    private Integer articlesRead;
-    private Integer projectsFinished;
-    private Integer learningStreak;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRoadmapProgress> roadmapProgress;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProjectProgress> projectProgress;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTutorialHistory> tutorialHistory;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -43,15 +49,12 @@ public class User {
     public LocalDate getJoinDate() { return joinDate; }
     public void setJoinDate(LocalDate joinDate) { this.joinDate = joinDate; }
 
-    public Integer getCoursesCompleted() { return coursesCompleted; }
-    public void setCoursesCompleted(Integer coursesCompleted) { this.coursesCompleted = coursesCompleted; }
+    public List<UserRoadmapProgress> getRoadmapProgress() { return roadmapProgress; }
+    public void setRoadmapProgress(List<UserRoadmapProgress> roadmapProgress) { this.roadmapProgress = roadmapProgress; }
 
-    public Integer getArticlesRead() { return articlesRead; }
-    public void setArticlesRead(Integer articlesRead) { this.articlesRead = articlesRead; }
+    public List<UserProjectProgress> getProjectProgress() { return projectProgress; }
+    public void setProjectProgress(List<UserProjectProgress> projectProgress) { this.projectProgress = projectProgress; }
 
-    public Integer getProjectsFinished() { return projectsFinished; }
-    public void setProjectsFinished(Integer projectsFinished) { this.projectsFinished = projectsFinished; }
-
-    public Integer getLearningStreak() { return learningStreak; }
-    public void setLearningStreak(Integer learningStreak) { this.learningStreak = learningStreak; }
+    public List<UserTutorialHistory> getTutorialHistory() { return tutorialHistory; }
+    public void setTutorialHistory(List<UserTutorialHistory> tutorialHistory) { this.tutorialHistory = tutorialHistory; }
 }

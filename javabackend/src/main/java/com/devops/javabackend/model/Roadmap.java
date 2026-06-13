@@ -5,7 +5,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "roadmaps")
-public class Roadmap {
+public class Roadmap extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -33,10 +33,7 @@ public class AdminSeeder implements CommandLineRunner {
             admin.setRole("ADMIN"); // Quyền Admin
             admin.setJoinDate(LocalDate.now());
             admin.setAvatar("/default-avatar.png");
-            admin.setCoursesCompleted(0);
-            admin.setArticlesRead(0);
-            admin.setProjectsFinished(0);
-            admin.setLearningStreak(0);
+
 
             userRepository.save(admin);
             System.out.println("✅ Đã tạo tài khoản Admin! Email: " + adminEmail + " | Mật khẩu: admin123");
