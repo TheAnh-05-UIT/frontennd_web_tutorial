@@ -8,6 +8,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-123456}
       MYSQL_DATABASE: devopsbuilder
+    command: --innodb-buffer-pool-size=64M
     ports:
       - "3307:3306"
     volumes:
@@ -33,10 +34,11 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost}
       SERVER_PORT: 8080
+      JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m"
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/api/v1/tutorials > /dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:8080/api/v1/tutorials || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
