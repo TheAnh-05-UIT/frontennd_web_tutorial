@@ -20,13 +20,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
+        StringBuilder errorMsg = new StringBuilder("Validation failed: ");
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
+            errorMsg.append(fieldName).append(" ").append(errorMessage).append("; ");
         });
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error("Validation failed"));
+                .body(ApiResponse.error(errorMsg.toString()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
