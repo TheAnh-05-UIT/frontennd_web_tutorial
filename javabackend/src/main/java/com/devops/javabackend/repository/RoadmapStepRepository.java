@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RoadmapStepRepository extends JpaRepository<RoadmapStep, Long> {
-    List<RoadmapStep> findByRoadmapIdOrderByCompletedAsc(Long roadmapId);
+    List<RoadmapStep> findByRoadmapIdOrderByIdAsc(Long roadmapId);
 }
